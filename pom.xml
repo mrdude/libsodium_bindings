@@ -35,7 +35,7 @@
 	</parent>
 
 	<artifactId>libsodium-bindings</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<inceptionYear>2017</inceptionYear>
 
 	<properties>
