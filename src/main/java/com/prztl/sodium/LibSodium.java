@@ -54,7 +54,7 @@ public interface LibSodium
 	                                               byte[] key);
 	
 	/**
-	 * Decrypts a message using the XChaCha20Poly1305 AEAS construction
+	 * Decrypts a message using the XChaCha20Poly1305 AEAD construction
 	 * @param plaintext the plaintext
 	 * @param plaintext_len the length of the plaintext
 	 * @param nsec should always be NULL -- isn't used by this construction
