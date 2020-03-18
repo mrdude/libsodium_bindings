@@ -48,13 +48,13 @@ internal object Extractor {
 	private val availableConfigurations = listOf<LibVersionImpl>(
 			//version 1.0.12
 			LibVersionImpl(
-					"/libsodium-1.0.12.x64.osx.dylib",
+					"/libsodium/1.0.12/libsodium-1.0.12-osx-x64.dylib",
 					version = "1.0.12",
 					_arch = SystemInfo.CPUArch.X64,
 					_os = SystemInfo.OS.MAC
 			),
 			LibVersionImpl(
-					"/libsodium-1.0.12.x64.linux.so",
+					"/libsodium/1.0.12/libsodium-1.0.12-linux-x64.so",
 					version = "1.0.12",
 					_arch = SystemInfo.CPUArch.X64,
 					_os = SystemInfo.OS.LINUX
@@ -62,40 +62,40 @@ internal object Extractor {
 
 			//version 1.0.18
 			LibVersionImpl(
-					"/libsodium-1.0.18-osx-x64",
+					"/libsodium/1.0.18/libsodium-1.0.18-osx-x64",
 					version = "1.0.18",
 					_arch = SystemInfo.CPUArch.X64,
 					_os = SystemInfo.OS.MAC
 			),
 			LibVersionImpl(
-					"/libsodium-1.0.18-linux-x64.so",
+					"/libsodium/1.0.18/libsodium-1.0.18-linux-x64.so",
 					version = "1.0.18",
 					_arch = SystemInfo.CPUArch.X64,
 					_os = SystemInfo.OS.LINUX
 			),
 			LibVersionImpl(
-					"/libsodium-1.0.18-mingw-x32.dll",
+					"/libsodium/1.0.18/libsodium-1.0.18-mingw-x32.dll",
 					version = "1.0.18",
 					_arch = SystemInfo.CPUArch.X32,
 					_os = SystemInfo.OS.WINDOWS,
 					tags = mapOf("runtime" to "mingw")
 			),
 			LibVersionImpl(
-					"/libsodium-1.0.18-mingw-x64.dll",
+					"/libsodium/1.0.18/libsodium-1.0.18-mingw-x64.dll",
 					version = "1.0.18",
 					_arch = SystemInfo.CPUArch.X64,
 					_os = SystemInfo.OS.WINDOWS,
 					tags = mapOf("runtime" to "mingw")
 			),
 			LibVersionImpl(
-					"/libsodium-1.0.18-msvc142-x32.dll",
+					"/libsodium/1.0.18/libsodium-1.0.18-msvc142-x32.dll",
 					version = "1.0.18",
 					_arch = SystemInfo.CPUArch.X32,
 					_os = SystemInfo.OS.WINDOWS,
 					tags = mapOf("runtime" to "msvc", "runtime-version" to "142")
 			),
 			LibVersionImpl(
-					"/libsodium-1.0.18-msvc142-x64.dll",
+					"/libsodium/1.0.18/libsodium-1.0.18-msvc142-x64.dll",
 					version = "1.0.18",
 					_arch = SystemInfo.CPUArch.X64,
 					_os = SystemInfo.OS.WINDOWS,
