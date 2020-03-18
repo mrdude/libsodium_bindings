@@ -22,6 +22,8 @@
  */
 package com.prztl.sodium
 
+import java.nio.ByteBuffer
+
 object Sodium {
 	private val libsodium: com.prztl.sodium.LibSodium
 	init {
@@ -65,6 +67,32 @@ object Sodium {
 				}
 
 				/**
+				 * Encrypts the given data and returns the ciphertext
+				 */
+				fun encrypt(message: ByteBuffer, additionalData: ByteBuffer, nonce: ByteBuffer, key: ByteBuffer,
+				            ciphertext: ByteBuffer): ByteBuffer {
+					assert(nonce.limit() == com.prztl.sodium.Sodium.Crypto.Aead.XChaCha20Poly1305.NONCE_BYTES)
+					assert(key.limit() == com.prztl.sodium.Sodium.Crypto.Aead.XChaCha20Poly1305.KEY_BYTES)
+					assert(ciphertext.limit() == message.limit() + com.prztl.sodium.Sodium.Crypto.Aead.XChaCha20Poly1305.A_BYTES)
+
+					val ciphertext_len = jnr.ffi.byref.NativeLongByReference(0L)
+
+					val res = com.prztl.sodium.Sodium.libsodium.crypto_aead_xchacha20poly1305_ietf_encrypt(ciphertext, ciphertext_len,
+							message, message.limit().toLong(),
+							additionalData, additionalData.limit().toLong(),
+							0L,
+							nonce,
+							key)
+
+					if( res != 0 ) {
+						throw RuntimeException("Could not encrypt packet")
+					}
+
+					ciphertext.limit(ciphertext_len.value.toInt())
+					return ciphertext
+				}
+
+				/**
 				 * Decrypts the given data and authenticates the additional data. Returns the plaintext, or NULL if
 				 * the ciphertext couldn't be decrypted.
 				 */
@@ -84,6 +112,33 @@ object Sodium {
 
 					return if(res == 0) {
 						java.util.Arrays.copyOf(plaintext, plaintext_len.value.toInt())
+					} else {
+						null //decryption failed!
+					}
+				}
+
+				/**
+				 * Decrypts the given data and authenticates the additional data. Returns the plaintext, or NULL if
+				 * the ciphertext couldn't be decrypted.
+				 */
+				fun decrypt(ciphertext: ByteBuffer, additionalData: ByteBuffer, nonce: ByteBuffer, key: ByteBuffer,
+				            plaintext: ByteBuffer): ByteBuffer? {
+					assert(nonce.limit() == com.prztl.sodium.Sodium.Crypto.Aead.XChaCha20Poly1305.NONCE_BYTES)
+					assert(key.limit() == com.prztl.sodium.Sodium.Crypto.Aead.XChaCha20Poly1305.KEY_BYTES)
+					assert(plaintext.limit() == ciphertext.limit() - com.prztl.sodium.Sodium.Crypto.Aead.XChaCha20Poly1305.A_BYTES)
+
+					val plaintext_len = jnr.ffi.byref.NativeLongByReference(0L)
+
+					val res = com.prztl.sodium.Sodium.libsodium.crypto_aead_xchacha20poly1305_ietf_decrypt(plaintext, plaintext_len,
+							0L,
+							ciphertext, ciphertext.limit().toLong(),
+							additionalData, additionalData.limit().toLong(),
+							nonce,
+							key)
+
+					return if(res == 0) {
+						plaintext.limit(plaintext_len.value.toInt())
+						return plaintext
 					} else {
 						null //decryption failed!
 					}

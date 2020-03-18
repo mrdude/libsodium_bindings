@@ -25,6 +25,8 @@ package com.prztl.sodium;
 import jnr.ffi.annotations.Out;
 import jnr.ffi.byref.NativeLongByReference;
 
+import java.nio.ByteBuffer;
+
 public interface LibSodium
 {
 	/**
@@ -54,6 +56,26 @@ public interface LibSodium
 	                                               byte[] key);
 	
 	/**
+	 * Encrypts a message using the XChaCha20Poly1305 AEAD construction
+	 * @param ciphertext the ciphertext
+	 * @param ciphertext_len the length of the ciphertext
+	 * @param message the plaintext message to encrypt
+	 * @param message_len the length of the plaintext message
+	 * @param additionaldata the additional data
+	 * @param additionaldata_len the length of the additional data
+	 * @param nsec should always be NULL -- isn't used by this construction
+	 * @param public_nonce the public nonce -- should be NONCE bytes
+	 * @param key the key -- should be KEY bytes
+	 * @return
+	 */
+	int crypto_aead_xchacha20poly1305_ietf_encrypt(@Out ByteBuffer ciphertext, NativeLongByReference ciphertext_len,
+	                                               ByteBuffer message, long message_len,
+	                                               ByteBuffer additionaldata, long additionaldata_len,
+	                                               long nsec,
+	                                               ByteBuffer public_nonce,
+	                                               ByteBuffer key);
+	
+	/**
 	 * Decrypts a message using the XChaCha20Poly1305 AEAD construction
 	 * @param plaintext the plaintext
 	 * @param plaintext_len the length of the plaintext
@@ -72,4 +94,24 @@ public interface LibSodium
 	                                               byte[] additionaldata, long additionaldata_len,
 	                                               byte[] public_nonce,
 	                                               byte[] key);
+	
+	/**
+	 * Decrypts a message using the XChaCha20Poly1305 AEAD construction
+	 * @param plaintext the plaintext
+	 * @param plaintext_len the length of the plaintext
+	 * @param nsec should always be NULL -- isn't used by this construction
+	 * @param ciphertext the ciphertext
+	 * @param ciphertext_len the length of the ciphertext
+	 * @param additionaldata the additional data
+	 * @param additionaldata_len the length of the additional data
+	 * @param public_nonce the public nonce -- should be NONCE bytes
+	 * @param key the key -- should be KEY bytes
+	 * @return 0 if the message was successfully decrypted, != 0 if decryption failed
+	 */
+	int crypto_aead_xchacha20poly1305_ietf_decrypt(@Out ByteBuffer plaintext, NativeLongByReference plaintext_len,
+	                                               long nsec,
+	                                               ByteBuffer ciphertext, long ciphertext_len,
+	                                               ByteBuffer additionaldata, long additionaldata_len,
+	                                               ByteBuffer public_nonce,
+	                                               ByteBuffer key);
 }
