@@ -103,8 +103,8 @@ internal object Extractor {
 			)
 	)
 
+	val AVAILABLE_CONFIGURATIONS: List<LibVersion> = availableConfigurations.toList()
 	const val LATEST_VERSION = "1.0.18"
-	val AVAILABLE_VERSIONS = availableConfigurations.map { it.version }.toSet()
 
 	private fun findMatchingVersion(version: String, tags: Map<String, String>): LibVersionImpl {
 		val os = SystemInfo.detectOS() ?: throw RuntimeException("Unable to detect OS")
