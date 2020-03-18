@@ -26,8 +26,9 @@ import java.io.File
 import java.io.FileOutputStream
 
 internal object Extractor {
-	private val LIB_MAC_X64 = "/libsodium-1.0.12.x64.osx.dylib"
-	private val LIB_NIX_X64 = "/libsodium-1.0.12.x64.linux.so"
+	val SODIUM_VERSION = "1.0.12"
+	private val LIB_MAC_X64 = "/libsodium-$SODIUM_VERSION.x64.osx.dylib"
+	private val LIB_NIX_X64 = "/libsodium-$SODIUM_VERSION.x64.linux.so"
 
 	data class LibVersion(val name: String, val libSuffix: String)
 	private val LINUX = LibVersion(LIB_NIX_X64, ".so")
@@ -46,7 +47,7 @@ internal object Extractor {
 		}
 
 	fun extract(): File {
-		val file = File.createTempFile("libsodium-1.0.12-", libVersion.libSuffix)
+		val file = File.createTempFile("libsodium-$SODIUM_VERSION-", libVersion.libSuffix)
 		val i = Extractor.javaClass.getResourceAsStream(libVersion.name)
 		val o = FileOutputStream(file)
 

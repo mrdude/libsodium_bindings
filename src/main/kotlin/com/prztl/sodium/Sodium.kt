@@ -35,6 +35,9 @@ object Sodium {
 		}
 	}
 
+	val VERSION: String
+		get() = Extractor.SODIUM_VERSION
+
 	object Crypto {
 		object Aead {
 			object XChaCha20Poly1305 {
