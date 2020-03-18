@@ -26,8 +26,10 @@ import java.nio.ByteBuffer
 
 object Sodium {
 	private val libsodium: com.prztl.sodium.LibSodium
+	val LIBRARY_VERSION: LibVersion
 	init {
-		val file = Extractor.extract()
+		val (file, _ver) = Extractor.extract()
+		LIBRARY_VERSION = _ver
 		com.prztl.sodium.Sodium.libsodium = jnr.ffi.LibraryLoader.create(LibSodium::class.java).load(file.absolutePath)
 		if(com.prztl.sodium.Sodium.libsodium.sodium_init() == -1) {
 			println("Failed to initialize libsodium")
@@ -36,7 +38,7 @@ object Sodium {
 	}
 
 	val VERSION: String
-		get() = Extractor.SODIUM_VERSION
+		get() = LIBRARY_VERSION.version
 
 	object Crypto {
 		object Aead {

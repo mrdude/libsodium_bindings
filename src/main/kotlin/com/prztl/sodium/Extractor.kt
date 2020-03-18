@@ -24,31 +24,109 @@ package com.prztl.sodium
 
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Paths
 
 internal object Extractor {
-	val SODIUM_VERSION = "1.0.12"
-	private val LIB_MAC_X64 = "/libsodium-$SODIUM_VERSION.x64.osx.dylib"
-	private val LIB_NIX_X64 = "/libsodium-$SODIUM_VERSION.x64.linux.so"
+	class LibVersionImpl(
+			val name: String,
+			override val version: String,
+			val _arch: SystemInfo.CPUArch,
+			val _os: SystemInfo.OS,
+			override val tags: Map<String, String> = mapOf()
+	) : LibVersion {
+		val nameWithoutExtension: String
+			get() = Paths.get(name).toFile().nameWithoutExtension
+		val libSuffix: String
+			get() = "." + Paths.get(name).toFile().extension
 
-	data class LibVersion(val name: String, val libSuffix: String)
-	private val LINUX = LibVersion(LIB_NIX_X64, ".so")
-	private val MAC = LibVersion(LIB_MAC_X64, ".dylib")
+		override val arch: String
+			get() = _arch.toString().toLowerCase()
+		override val os: String
+			get() = _os.toString().toLowerCase()
+	}
 
-	private val libVersion: LibVersion
-		get() {
-			val osname = System.getProperty("os.name")
-			return if(osname.contains("linux", ignoreCase = true)) {
-				LINUX
-			} else if(osname.contains("mac", ignoreCase = true)) {
-				MAC
-			} else {
-				throw RuntimeException("Unknown architecture/os")
-			}
+	private val availableConfigurations = listOf<LibVersionImpl>(
+			//version 1.0.12
+			LibVersionImpl(
+					"/libsodium-1.0.12.x64.osx.dylib",
+					version = "1.0.12",
+					_arch = SystemInfo.CPUArch.X64,
+					_os = SystemInfo.OS.MAC
+			),
+			LibVersionImpl(
+					"/libsodium-1.0.12.x64.linux.so",
+					version = "1.0.12",
+					_arch = SystemInfo.CPUArch.X64,
+					_os = SystemInfo.OS.LINUX
+			),
+
+			//version 1.0.18
+			LibVersionImpl(
+					"/libsodium-1.0.18-osx-x64",
+					version = "1.0.18",
+					_arch = SystemInfo.CPUArch.X64,
+					_os = SystemInfo.OS.MAC
+			),
+			LibVersionImpl(
+					"/libsodium-1.0.18-linux-x64.so",
+					version = "1.0.18",
+					_arch = SystemInfo.CPUArch.X64,
+					_os = SystemInfo.OS.LINUX
+			),
+			LibVersionImpl(
+					"/libsodium-1.0.18-mingw-x32.dll",
+					version = "1.0.18",
+					_arch = SystemInfo.CPUArch.X32,
+					_os = SystemInfo.OS.WINDOWS,
+					tags = mapOf("runtime" to "mingw")
+			),
+			LibVersionImpl(
+					"/libsodium-1.0.18-mingw-x64.dll",
+					version = "1.0.18",
+					_arch = SystemInfo.CPUArch.X64,
+					_os = SystemInfo.OS.WINDOWS,
+					tags = mapOf("runtime" to "mingw")
+			),
+			LibVersionImpl(
+					"/libsodium-1.0.18-msvc142-x32.dll",
+					version = "1.0.18",
+					_arch = SystemInfo.CPUArch.X32,
+					_os = SystemInfo.OS.WINDOWS,
+					tags = mapOf("runtime" to "msvc", "runtime-version" to "142")
+			),
+			LibVersionImpl(
+					"/libsodium-1.0.18-msvc142-x64.dll",
+					version = "1.0.18",
+					_arch = SystemInfo.CPUArch.X64,
+					_os = SystemInfo.OS.WINDOWS,
+					tags = mapOf("runtime" to "msvc", "runtime-version" to "142")
+			)
+	)
+
+	const val LATEST_VERSION = "1.0.18"
+	val AVAILABLE_VERSIONS = availableConfigurations.map { it.version }.toSet()
+
+	private fun findMatchingVersion(version: String, tags: Map<String, String>): LibVersionImpl {
+		val os = SystemInfo.detectOS() ?: throw RuntimeException("Unable to detect OS")
+		val arch = SystemInfo.detectCPUArch() ?: throw RuntimeException("Unable to detect CPU architecture")
+
+		val potentialVersions = availableConfigurations.filter { cfg ->
+			cfg.version == version && cfg._os == os && cfg._arch == arch
+		}.filter { cfg ->
+			tags.all { (k, v) -> cfg.tags[k] == v }
 		}
 
-	fun extract(): File {
-		val file = File.createTempFile("libsodium-$SODIUM_VERSION-", libVersion.libSuffix)
-		val i = Extractor.javaClass.getResourceAsStream(libVersion.name)
+		if(potentialVersions.isEmpty()) {
+			throw RuntimeException("Could not find a matching version")
+		}
+
+		return potentialVersions[0]
+	}
+
+	fun extract(version: String = LATEST_VERSION, tags: Map<String, String> = mapOf()): Pair<File, LibVersion> {
+		val libVer = findMatchingVersion(version, tags)
+		val file = File.createTempFile(libVer.nameWithoutExtension, libVer.libSuffix)
+		val i = Extractor.javaClass.getResourceAsStream(libVer.name)
 		val o = FileOutputStream(file)
 
 		val buf = ByteArray(4096)
@@ -62,6 +140,6 @@ internal object Extractor {
 		}
 		o.close()
 
-		return file
+		return file to libVer
 	}
 }
